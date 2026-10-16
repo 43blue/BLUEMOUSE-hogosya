@@ -404,6 +404,25 @@ const firebaseConfig = {
 };
 
 let db, currentParent = null, labeledDescriptors = [], detectionTimer = null, lastFaceTime = 0;
+
+/* ── ノートPCで一日中つけっぱなしにするための備え ──
+   MacBook Air を受付に置いて運用するため、次の2つに対処している。
+   1. 画面が暗くなって消えてしまう → 画面スリープ抑止を要求する
+   2. スリープ復帰や他アプリのカメラ使用で映像が止まる →
+      止まったことを検知してカメラをつなぎ直す。
+      これを入れないと「画面は正常に見えるのに誰も認証できない」状態になり、
+      その場では気づけない */
+let wakeLock = null;
+let videoTrack = null, cameraRestarting = false, lastVideoTime = -1, stalledTicks = 0;
+
+async function keepScreenOn() {
+  if (!('wakeLock' in navigator)) return;   // 非対応のブラウザでは何もしない
+  if (wakeLock && !wakeLock.released) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  } catch(e) { console.error('画面スリープ抑止を取得できませんでした', e); }
+}
 // チェックリストを開いた時点の保護者を保持（表示中に顔がカメラから外れても記録できるように）
 let checklistParent = null, isSubmitting = false;
 
@@ -480,7 +499,16 @@ window.addEventListener('load', async () => {
     ]);
   } catch(e) { console.error(e); }
   document.getElementById('loadingOverlay').style.display = 'none';
+  keepScreenOn();
   startCamera();
+});
+
+/* 画面が隠れると画面スリープ抑止は自動で解除されるので、戻ってきたら取り直す。
+   スリープ復帰でカメラが死んでいることもあるので合わせて確認する */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  keepScreenOn();
+  if (videoTrack && videoTrack.readyState !== 'live') restartCamera();
 });
 
 function waitForFaceApi() {
@@ -500,10 +528,44 @@ function startClock(tId, dId) {
   update(); setInterval(update, 1000);
 }
 
+// カメラを取得して映像を流す。失敗したら例外を投げる
+async function acquireCamera() {
+  const v = document.getElementById('video');
+  // 古いストリームが残っていると取り直せないことがあるので必ず止める
+  if (v.srcObject) { v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
+  v.srcObject = stream; await v.play();
+  videoTrack = stream.getVideoTracks()[0];
+  // 切れたことがその場で分かるものは即座に拾う
+  videoTrack.addEventListener('ended', () => restartCamera());
+  videoTrack.addEventListener('mute',  () => restartCamera());
+  lastVideoTime = -1; stalledTicks = 0;
+}
+
+// 映像が止まったら、つながるまで間隔を空けながらつなぎ直し続ける
+async function restartCamera() {
+  if (cameraRestarting) return;
+  cameraRestarting = true;
+  if (detectionTimer) { clearInterval(detectionTimer); detectionTimer = null; }
+  hideProfile();
+  setStatus('カメラを再接続しています…', '');
+  for (let wait = 1000; ; wait = Math.min(wait * 2, 30000)) {
+    try {
+      await acquireCamera();
+      cameraRestarting = false;
+      setStatus('保護者の顔をカメラに向けてください', 'detecting');
+      startDetection();
+      return;
+    } catch(e) {
+      console.error('カメラの再接続に失敗。再試行します', e);
+      await new Promise(r => setTimeout(r, wait));
+    }
+  }
+}
+
 async function startCamera() {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
-    const v = document.getElementById('video'); v.srcObject = stream; await v.play();
+    await acquireCamera();
   } catch(e) {
     console.error(e); setStatus('カメラにアクセスできません', ''); return;
   }
@@ -529,6 +591,14 @@ function startDetection() {
   if (detectionTimer) clearInterval(detectionTimer);
   const v = document.getElementById('video');
   detectionTimer = setInterval(async () => {
+    // 映像が生きているか先に確かめる。画面が隠れている間は止まって当然なので見ない
+    if (document.visibilityState === 'visible') {
+      if (videoTrack && videoTrack.readyState !== 'live') { restartCamera(); return; }
+      if (v.currentTime === lastVideoTime) {
+        // 約5秒フレームが進まなければ固まったとみなす
+        if (++stalledTicks >= 8) { restartCamera(); return; }
+      } else { stalledTicks = 0; lastVideoTime = v.currentTime; }
+    }
     if (!v.videoWidth) return;
     try {
       const det = await faceapi.detectSingleFace(v, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceDescriptor();
