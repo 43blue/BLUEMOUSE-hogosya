@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>お迎え記録 | BLUE MOUSE</title>
+  <title>入退所記録 | BLUE MOUSE</title>
   <!-- 本番HPと同じフォント。和文=Zen Maru Gothic（丸ゴシック）／数字・英字=Inter。
        Zen Maru Gothic は 400/500/700 のみで 800 は無いため、太字は 700 までにする -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -54,7 +54,7 @@
     .topbar-logo { height: var(--topbar-logo-h); width: auto; display: block; }
 
     /* 画面が低い端末（スマホ・横向き）では帯を元の高さに戻し、
-       時計からお迎え完了ボタンまでが1画面に収まることを優先する */
+       時計から記録ボタンまでが1画面に収まることを優先する */
     @media (max-height: 720px) {
       :root { --topbar-h: 52px; --topbar-logo-h: 30px; }
     }
@@ -131,7 +131,7 @@
     .profile-child-name { font-size: 13px; color: rgba(var(--bm-ink),0.5); margin-top: 2px; }
     .auth-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(95,193,199,0.12); border: 1px solid rgba(95,193,199,0.35); color: #3aa8ae; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; margin-top: 6px; }
 
-    /* 子供写真エリア */
+    /* おこさまの写真エリア */
     #childPhotoArea {
       display: none;
       align-items: center; gap: 12px;
@@ -311,7 +311,7 @@
   <img src="logo.webp" alt="BLUE MOUSE" class="topbar-logo">
 </div>
 
-<!-- お迎え画面 -->
+<!-- 入退所画面 -->
 <div id="clockScreen">
   <div class="clock-time-section">
     <div class="clock-time" id="clockTime">--:--:--</div>
@@ -331,7 +331,7 @@
         <div class="auth-badge">✓ 顔認証完了</div>
       </div>
     </div>
-    <!-- 子供行 -->
+    <!-- おこさまの行 -->
     <div id="childPhotoArea">
       <img id="childPhotoEl" src="" alt="">
       <div>
@@ -357,7 +357,8 @@
           <div class="checklist-child" id="checklistChild"></div>
         </div>
       </div>
-      <div class="checklist-subtitle">お迎え前に以下の項目をご確認ください</div>
+      <!-- 以下の文言は開くときに VISIT_COPY で上書きされる。ここは初期値 -->
+      <div class="checklist-subtitle">ご利用前に以下の項目をご確認ください</div>
     </div>
     <div class="checklist-body">
       <div class="checklist-error" id="checklistError"></div>
@@ -370,7 +371,7 @@
       </ul>
       <div class="checklist-actions">
         <button class="btn-checklist-cancel" onclick="closeChecklist()">キャンセル</button>
-        <button class="btn-checklist-confirm" id="btnConfirmPickup" disabled onclick="confirmPickup()">✓ お迎え完了</button>
+        <button class="btn-checklist-confirm" id="btnConfirmPickup" disabled onclick="confirmPickup()">✓ 来所する</button>
       </div>
     </div>
   </div>
@@ -378,14 +379,15 @@
 
 <!-- サンクス画面 -->
 <div id="thanksScreen">
-  <div class="thanks-badge">✓ &nbsp;お迎え記録完了</div>
+  <!-- バッジと下のメッセージは showThanks で VISIT_COPY に差し替わる。ここは初期値 -->
+  <div class="thanks-badge">✓ &nbsp;来所を記録しました</div>
   <div class="thanks-photo-wrap">
     <div class="thanks-ring"></div>
     <img class="thanks-photo" id="thanksPhoto" src="" alt="">
   </div>
   <div class="thanks-name" id="thanksName"></div>
   <div class="thanks-child" id="thanksChild"></div>
-  <div class="thanks-message">お迎えありがとうございます！</div>
+  <div class="thanks-message">いってらっしゃい！</div>
   <div class="thanks-time" id="thanksTime"></div>
   <div class="thanks-bar"><div class="thanks-bar-fill" id="thanksBar"></div></div>
 </div>
@@ -554,7 +556,7 @@ function showProfile(parent) {
   document.getElementById('parentRelLabel').textContent = parent.childName ? `${parent.childName}の保護者` : '';
   document.getElementById('parentPhotoEl').src = parent.photo || generateAvatar(parent.name);
 
-  // 子供写真
+  // おこさまの写真
   const childArea = document.getElementById('childPhotoArea');
   if (parent.childName) {
     document.getElementById('childNameEl').textContent = parent.childName;
@@ -678,7 +680,7 @@ async function confirmPickup() {
   showThanks(parent, jst);
 }
 
-// 退所：チェックリストを通さず、お迎え画面のボタンから直接記録する
+// 退所：チェックリストを通さず、入退所画面のボタンから直接記録する
 async function recordDirect(parent) {
   const btn = document.getElementById('btnPickup');
   const lead = document.getElementById('actionLead');

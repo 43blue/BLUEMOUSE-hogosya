@@ -320,7 +320,7 @@ function openDayModal(year, month, day) {
       <img class="day-record-photo" src="${photo}" alt="">
       <div class="day-record-info">
         <div class="day-record-name">${p.name||r.parentName||'不明'}</div>
-        <div class="day-record-child">${p.childName||r.childName ? 'お子様：'+(p.childName||r.childName) : ''}</div>
+        <div class="day-record-child">${p.childName||r.childName ? 'おこさま：'+(p.childName||r.childName) : ''}</div>
         <div class="day-record-time"><span class="visit-tag${visitTypeOf(r) === 'arrival' ? ' visit-tag--in' : ''}">${VISIT_LABEL[visitTypeOf(r)]}</span>${hm}</div>
       </div>
       ${childPhotoHtml}

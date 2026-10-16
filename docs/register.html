@@ -239,7 +239,7 @@
     <input type="password" class="auth-input" id="authInput" placeholder="管理者パスワード" onkeydown="if(event.key==='Enter')checkAuth()">
     <button class="auth-btn" onclick="checkAuth()">認証する</button>
     <div id="authError" style="color:#f87171;font-size:13px;margin-top:12px;display:none">パスワードが正しくありません</div>
-    <div style="margin-top:20px"><a href="index.html" style="color:rgba(255,255,255,0.25);font-size:13px;text-decoration:none">← お迎え画面へ戻る</a></div>
+    <div style="margin-top:20px"><a href="index.html" style="color:rgba(255,255,255,0.25);font-size:13px;text-decoration:none">← 入退所画面へ戻る</a></div>
   </div>
 </div>
 
@@ -255,7 +255,7 @@
       <img src="logo.webp" alt="BLUE MOUSE">
       <div class="sub">管理メニュー</div>
     </div>
-    <a href="index.html" class="asb-link"><span class="icon">🏠</span> お迎え画面</a>
+    <a href="index.html" class="asb-link"><span class="icon">🏠</span> 入退所画面</a>
     <a href="parents.html" class="asb-link"><span class="icon">👥</span> 保護者一覧</a>
     <a href="calendar.html" class="asb-link"><span class="icon">📅</span> カレンダー</a>
     <hr class="asb-divider">
@@ -302,7 +302,7 @@
         <div class="card-icon coral">👨‍👩‍👧</div>
         <div>
           <div class="card-title">基本情報</div>
-          <div class="card-subtitle">保護者氏名とお子様の名前を入力してください</div>
+          <div class="card-subtitle">保護者氏名とおこさまの名前を入力してください</div>
         </div>
       </div>
       <div class="form-row">
@@ -311,7 +311,7 @@
           <input type="text" class="form-input" id="inputName" placeholder="例：山田 花子" oninput="checkStep1()">
         </div>
         <div class="form-group">
-          <label class="form-label">お子様の名前<span class="required">*</span></label>
+          <label class="form-label">おこさまの名前<span class="required">*</span></label>
           <input type="text" class="form-input" id="inputChildName" placeholder="例：山田 太郎" oninput="checkStep1()">
         </div>
       </div>
@@ -323,7 +323,7 @@
         <div class="card-icon teal">📷</div>
         <div>
           <div class="card-title">写真登録</div>
-          <div class="card-subtitle">保護者・お子様それぞれの写真を撮影してください</div>
+          <div class="card-subtitle">保護者・おこさまそれぞれの写真を撮影してください</div>
         </div>
       </div>
 
@@ -356,10 +356,10 @@
           <div class="status-inline" id="parentStatus"></div>
         </div>
 
-        <!-- 子供写真 -->
+        <!-- こどもの写真 -->
         <div class="photo-slot">
           <div class="photo-slot-label">
-            🧒 お子様
+            🧒 おこさま
             <span class="photo-slot-badge teal">任意</span>
           </div>
           <div class="camera-box" id="childCameraBox">
@@ -519,7 +519,7 @@ async function shootCam(who) {
     state.parent.faceDescriptor = descriptor;
     setStatus('parent', 'success', '✓ 顔認証データ取得完了');
   } else {
-    // 子供は中央クロップ（アスペクト比を保って正方形に）
+    // こどもの写真は中央クロップ（アスペクト比を保って正方形に）
     state.child.photoB64 = centerCrop(canvas, 300);
     setStatus('child', 'success', '✓ 写真撮影完了');
   }

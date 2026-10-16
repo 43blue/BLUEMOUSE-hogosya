@@ -156,7 +156,7 @@
     <div class="page-title">保護者一覧</div>
     <div class="page-sub" id="parentCount">読み込み中...</div>
     <div class="search-bar">
-      <input type="text" class="search-input" id="searchInput" placeholder="名前・お子様名で検索" oninput="filterParents()">
+      <input type="text" class="search-input" id="searchInput" placeholder="名前・おこさま名で検索" oninput="filterParents()">
     </div>
     <div class="parent-grid" id="parentGrid">
       <div class="empty-state"><div class="icon">⏳</div><div>読み込み中...</div></div>
@@ -250,7 +250,7 @@ function renderParents(list) {
     card.innerHTML = `
       <img class="parent-photo" src="${photo}" alt="${p.name}">
       <div class="parent-name">${p.name}</div>
-      <div class="parent-child">${p.childName ? 'お子様：'+p.childName : ''}</div>
+      <div class="parent-child">${p.childName ? 'おこさま：'+p.childName : ''}</div>
       ${childRow}
       <button class="btn-detail" onclick="openDetail('${p.id}')">📅 詳細を見る</button>`;
     grid.appendChild(card);
@@ -269,11 +269,11 @@ async function openDetail(parentId) {
   document.getElementById('modalParentName').textContent = p.name;
   document.getElementById('modalParentPhoto').src = p.photoBase64 || avatar(p.name);
 
-  // 子供行
+  // こどもの行
   const childRow = document.getElementById('modalChildRow');
   if (p.childName) {
     const cphoto = p.childPhotoBase64 ? `<img class="modal-child-photo" src="${p.childPhotoBase64}" alt="">` : '';
-    childRow.innerHTML = `${cphoto}<span>お子様：${p.childName}</span>`;
+    childRow.innerHTML = `${cphoto}<span>おこさま：${p.childName}</span>`;
   } else { childRow.innerHTML = ''; }
 
   document.getElementById('calContainer').innerHTML = '<div class="no-records">読み込み中...</div>';

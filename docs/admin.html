@@ -329,7 +329,7 @@ async function loadParentList() {
     card.innerHTML = `
       <img class="parent-card-photo" src="${d.photoBase64 || generateAvatar(d.name)}" alt="${d.name}">
       <div class="parent-card-name">${d.name}</div>
-      <div class="parent-card-child">${d.childName ? 'お子様：' + d.childName : ''}</div>
+      <div class="parent-card-child">${d.childName ? 'おこさま：' + d.childName : ''}</div>
       <button class="btn-delete-parent" onclick="deleteParent('${doc.id}','${d.name}',event)">🗑 削除</button>`;
     grid.appendChild(card);
   });
@@ -451,7 +451,7 @@ function renderHistory() {
   if (!records.length) { container.innerHTML = '<div class="history-empty">記録がありません</div>'; return; }
 
   let html = `<table class="history-table">
-    <thead><tr><th>写真</th><th>区分</th><th>保護者 / お子様</th><th>時刻</th><th></th></tr></thead><tbody>`;
+    <thead><tr><th>写真</th><th>区分</th><th>保護者 / おこさま</th><th>時刻</th><th></th></tr></thead><tbody>`;
   records.forEach(r => {
     let dateStr='–', timeStr='–';
     if (r.timestamp) {
@@ -467,7 +467,7 @@ function renderHistory() {
     html += `<tr>
       <td>${photoHtml}</td>
       <td><span class="pickup-badge${vt === 'arrival' ? ' pickup-badge--in' : ''}">${VISIT_LABEL[vt]}</span></td>
-      <td><div class="rec-parent">${r.parentName||'–'}</div><div class="rec-child">${r.childName?'お子様：'+r.childName:''}</div></td>
+      <td><div class="rec-parent">${r.parentName||'–'}</div><div class="rec-child">${r.childName?'おこさま：'+r.childName:''}</div></td>
       <td><div class="rec-time">${timeStr}</div><div class="rec-date">${dateStr}</div></td>
       <td><button class="btn-rec-delete" onclick="deleteRecord('${r.id}',this)">🗑</button></td>
     </tr>`;
